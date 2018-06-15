@@ -37,6 +37,7 @@ void setup() {
   pinMode(greenLed, OUTPUT);
   pinMode(yellowLed, OUTPUT);
   pinMode(redLed, OUTPUT);
+  pinMode(flagLed, OUTPUT);
   
 }
 
@@ -95,6 +96,22 @@ void serialEvent() {
       digitalWrite(redLed, HIGH);
       stringComplete = true;
     }
+    else if(inputString == "off") {
+      digitalWrite(greenLed, LOW);
+      digitalWrite(yellowLed, LOW);
+      digitalWrite(redLed, LOW);
+      digitalWrite(flagLed, LOW);
+      stringComplete = true;
+    }
+    else if (inputString == "flag") {
+      digitalWrite(flagLed, HIGH);
+      stringComplete = true;
+    }
+    else if (inputString == "flagoff") {
+      digitalWrite(flagLed, LOW);
+      stringComplete = true;
+    }
+    
 
     
     // if the incoming character is a newline, set a flag so the main loop can
