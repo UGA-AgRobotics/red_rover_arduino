@@ -18,6 +18,9 @@
   http://www.arduino.cc/en/Tutorial/SerialEvent
 */
 
+#include <ros.h>
+#include <std_msgs/String.h>
+
 String inputString = "";         // a String to hold incoming data
 boolean stringComplete = false;  // whether the string is complete
 
@@ -26,20 +29,44 @@ int yellowLed = 6;
 int redLed = 5;
 int flagLed = 4;  // blue led for indicating robot is at flag
 
+//int rfD0 = 0;  // RF receiver, using A0 a digital pin
+//int rfD1 = 1;  // using A1
+//int rfD2 = 2;  // using A2
+//int rfD3 = 3;  // using A3
+
+char stopMessage[4] = "stop";
+
+ros::NodeHandle nh;
+
+std_msgs::String str_msg;
+ros::Publisher rfStop("rf_stop", &str_msg);
+
 
 
 void setup() {
+
+  nh.initNode();
+  nh.advertise(rfStop);  // publish to /rf_stop topic
+  
   // initialize serial:
   Serial.begin(9600);
   // reserve 200 bytes for the inputString:
   inputString.reserve(200);
 
+  // Pin modes for LEDs:
   pinMode(greenLed, OUTPUT);
   pinMode(yellowLed, OUTPUT);
   pinMode(redLed, OUTPUT);
   pinMode(flagLed, OUTPUT);
+
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+  pinMode(A3, INPUT);
   
 }
+
+
 
 void loop() {
   
@@ -53,17 +80,32 @@ void loop() {
 
 
   // Check for emergency stop signal from remote (32197-MI)
-
+  checkForEmergencyStop();
   
+  nh.spinOnce();
   
 }
+
+
+
+void checkForEmergencyStop() {
+  int rfButtonA = digitalRead(A2);  // Reads RF signal for emergency stop
+  if (rfButtonA >= 1) {
+    // Send signal to robot to do an emergency stop!
+    Serial.println("Perform emergency stop!");
+//    Serial.write(stopMessage);
+    
+  }
+}
+
+
+
 
 /*
   SerialEvent occurs whenever a new data comes in the hardware serial RX. This
   routine is run between each time loop() runs, so using delay inside loop can
   delay response. Multiple bytes of data may be available.
 */
-
 void serialEvent() {
   while (Serial.available()) {
     // get the new byte:
