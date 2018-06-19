@@ -36,17 +36,17 @@ int flagLed = 4;  // blue led for indicating robot is at flag
 
 char stopMessage[4] = "stop";
 
-ros::NodeHandle nh;
+//ros::NodeHandle nh;
 
-std_msgs::String str_msg;
-ros::Publisher rfStop("rf_stop", &str_msg);
+//std_msgs::String str_msg;
+//ros::Publisher rfStop("rf_stop", &str_msg);
 
 
 
 void setup() {
 
-  nh.initNode();
-  nh.advertise(rfStop);  // publish to /rf_stop topic
+//  nh.initNode();
+//  nh.advertise(rfStop);  // publish to /rf_stop topic
   
   // initialize serial:
   Serial.begin(9600);
@@ -72,7 +72,7 @@ void loop() {
   
   // print the string when a newline arrives:
   if (stringComplete) {
-    Serial.println(inputString);
+//    Serial.println(inputString);
     // clear the string:
     inputString = "";
     stringComplete = false;
@@ -80,9 +80,9 @@ void loop() {
 
 
   // Check for emergency stop signal from remote (32197-MI)
-  checkForEmergencyStop();
+//  checkForEmergencyStop();
   
-  nh.spinOnce();
+//  nh.spinOnce();
   
 }
 
