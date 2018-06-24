@@ -33,6 +33,8 @@ int yellowLed = 6;
 int redLed = 5;
 int flagLed = 4;  // blue led for indicating robot is at flag
 
+std_msgs::Bool bool_msg;
+
 
 
 ros::NodeHandle nh;
@@ -49,7 +51,7 @@ ros::Subscriber<std_msgs::String> emlidSubscriber("/emlid_solution_status", emli
 ros::Subscriber<std_msgs::Bool> flagSubscriber("/at_flag", atFlagCallback);
 
 std_msgs::String str_msg;
-ros::Publisher rfStop("rf_stop", &str_msg);
+ros::Publisher rfStop("rf_stop", &bool_msg);
 
 
 
@@ -81,6 +83,8 @@ void loop() {
   checkForEmergencyStop();
   
   nh.spinOnce();
+
+  delay(10);
   
 }
 
@@ -89,9 +93,14 @@ void loop() {
 void checkForEmergencyStop() {
   int rfButtonA = digitalRead(A2);  // Reads RF signal for emergency stop
   if (rfButtonA >= 1) {
-    str_msg.data = stopMessage;
-    rfStop.publish(&str_msg);
+    //str_msg.data = stopMessage;
+    bool_msg.data = true;
+    rfStop.publish(&bool_msg);
   }
+//  else {
+//    bool_msg.data = false;
+//    rfStop.publish(&bool_msg);
+//  }
 }
 
 
@@ -150,4 +159,5 @@ void handleLeds(std_msgs::String solutionStatus) {
     }
 
 }
+
 
