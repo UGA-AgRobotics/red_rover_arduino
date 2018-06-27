@@ -84,7 +84,7 @@ void loop() {
   
   nh.spinOnce();
 
-  delay(10);
+  delay(100);
   
 }
 
@@ -97,10 +97,10 @@ void checkForEmergencyStop() {
     bool_msg.data = true;
     rfStop.publish(&bool_msg);
   }
-//  else {
-//    bool_msg.data = false;
-//    rfStop.publish(&bool_msg);
-//  }
+  else {
+    bool_msg.data = false;
+    rfStop.publish(&bool_msg);
+  }
 }
 
 
