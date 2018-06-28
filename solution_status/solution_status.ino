@@ -33,7 +33,12 @@ int yellowLed = 6;
 int redLed = 5;
 int flagLed = 4;  // blue led for indicating robot is at flag
 
-std_msgs::Bool bool_msg;
+int startLed = 12;
+int stopLed = 11;
+
+std_msgs::Bool start_bool_msg;
+std_msgs::Bool stop_bool_msg;
+std_msgs::String str_msg;
 
 
 
@@ -47,18 +52,23 @@ void emlidCallback(std_msgs::String emlidMessage) {
   handleLeds(emlidMessage);
 }
 
+// Subscribers:
 ros::Subscriber<std_msgs::String> emlidSubscriber("/emlid_solution_status", emlidCallback);
 ros::Subscriber<std_msgs::Bool> flagSubscriber("/at_flag", atFlagCallback);
 
-std_msgs::String str_msg;
-ros::Publisher rfStop("rf_stop", &bool_msg);
+// Publishers:
+ros::Publisher rfStop("/rf_stop", &stop_bool_msg);
+ros::Publisher rfStart("/rf_start", &start_bool_msg);
 
 
 
 void setup() {
 
+  Serial.begin(9600);
+
   nh.initNode();
-  nh.advertise(rfStop);  // publish to /rf_stop topic
+  nh.advertise(rfStop);  // publishes to /rf_stop topic
+  nh.advertise(rfStart);  // publishes to /rf_start topic
   nh.subscribe(emlidSubscriber);
   nh.subscribe(flagSubscriber);
 
@@ -67,6 +77,8 @@ void setup() {
   pinMode(yellowLed, OUTPUT);
   pinMode(redLed, OUTPUT);
   pinMode(flagLed, OUTPUT);
+  pinMode(startLed, OUTPUT);
+  pinMode(stopLed, OUTPUT);
 
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
@@ -91,16 +103,61 @@ void loop() {
 
 
 void checkForEmergencyStop() {
+  
   int rfButtonA = digitalRead(A2);  // Reads RF signal for emergency stop
-  if (rfButtonA >= 1) {
-    //str_msg.data = stopMessage;
-    bool_msg.data = true;
-    rfStop.publish(&bool_msg);
+  int rfButtonB = digitalRead(A0);  // Reads RF signal for starting back up
+
+  if (rfButtonA == 0 && rfButtonB == 0) {
+    // Pause the rover.
+    
+    stop_bool_msg.data = true;
+    start_bool_msg.data = false;
+    
+    rfStop.publish(&stop_bool_msg);
+    rfStart.publish(&start_bool_msg);
+
+    digitalWrite(startLed, LOW);
+    digitalWrite(stopLed, HIGH);
+    
   }
-  else {
-    bool_msg.data = false;
-    rfStop.publish(&bool_msg);
+  else if (rfButtonA == 0 && rfButtonB == 1) {
+    // Start driving the rover.
+    
+    stop_bool_msg.data = false;
+    start_bool_msg.data = true;
+    
+    rfStop.publish(&stop_bool_msg);  // false to rfStop
+    rfStart.publish(&start_bool_msg);  // true to rfStart
+
+    digitalWrite(startLed, HIGH);
+    digitalWrite(stopLed, LOW);
+     
   }
+  else if (rfButtonA == 1 && rfButtonB == 0) {
+    // Pause the rover.
+    
+    stop_bool_msg.data = true;
+    
+    rfStop.publish(&stop_bool_msg);  // true to rfStop
+    start_bool_msg.data = false;
+    rfStart.publish(&start_bool_msg);  // false to rfStart
+
+    digitalWrite(startLed, LOW);
+    digitalWrite(stopLed, HIGH);
+    
+  }
+  else if (rfButtonA == 1 && rfButtonB == 1) {
+    // Pause the rover.
+    stop_bool_msg.data = true;
+    rfStop.publish(&stop_bool_msg);  // true to rfStop
+    start_bool_msg.data = false;
+    rfStart.publish(&start_bool_msg);  // false to rfStart
+
+    digitalWrite(startLed, LOW);
+    digitalWrite(stopLed, HIGH);
+    
+  }
+  
 }
 
 

@@ -48,13 +48,13 @@ void loop() {
 // dur 7 controls the left vs rigtht turning
 // left goes to 955 and right goes to 1772
 // the middle is 1370
-  if (dur7 >= 1500)
+  if (dur7 >= 1600)
   {
     // turn right
     digitalWrite(3, HIGH);
   }
     
-  else if (dur7 < 1200)
+  else if (dur7 < 1100)
   {
    digitalWrite(5, HIGH); 
   }
