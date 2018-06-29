@@ -102,60 +102,51 @@ void loop() {
 
 
 
+void handleStartRoutine() {
+
+  stop_bool_msg.data = false;
+  start_bool_msg.data = true;
+
+  rfStop.publish(&stop_bool_msg);
+  rfStart.publish(&start_bool_msg);
+
+  digitalWrite(startLed, HIGH);
+  digitalWrite(stopLed, LOW);
+
+}
+
+
+
+void handleStopRoutine() {
+  // Publishes True to /rf_stop topic, and
+  // lights stop LED.
+
+  stop_bool_msg.data = true;
+  start_bool_msg.data = false;
+
+  rfStop.publish(&stop_bool_msg);
+  rfStart.publish(&start_bool_msg);
+
+  digitalWrite(startLed, LOW);
+  digitalWrite(stopLed, HIGH);
+
+}
+
+
+
 void checkForEmergencyStop() {
   
   int rfButtonA = digitalRead(A2);  // Reads RF signal for emergency stop
   int rfButtonB = digitalRead(A0);  // Reads RF signal for starting back up
 
-  if (rfButtonA == 0 && rfButtonB == 0) {
-    // Pause the rover.
-    
-    stop_bool_msg.data = true;
-    start_bool_msg.data = false;
-    
-    rfStop.publish(&stop_bool_msg);
-    rfStart.publish(&start_bool_msg);
-
-    digitalWrite(startLed, LOW);
-    digitalWrite(stopLed, HIGH);
-    
+  if (rfButtonA >= 1) {
+    handleStopRoutine();  // Pause the rover.
   }
-  else if (rfButtonA == 0 && rfButtonB == 1) {
-    // Start driving the rover.
-    
-    stop_bool_msg.data = false;
-    start_bool_msg.data = true;
-    
-    rfStop.publish(&stop_bool_msg);  // false to rfStop
-    rfStart.publish(&start_bool_msg);  // true to rfStart
-
-    digitalWrite(startLed, HIGH);
-    digitalWrite(stopLed, LOW);
-     
+  else if (rfButtonB >= 1) {
+    handleStartRoutine();  // Start the rover.
   }
-  else if (rfButtonA == 1 && rfButtonB == 0) {
-    // Pause the rover.
-    
-    stop_bool_msg.data = true;
-    
-    rfStop.publish(&stop_bool_msg);  // true to rfStop
-    start_bool_msg.data = false;
-    rfStart.publish(&start_bool_msg);  // false to rfStart
-
-    digitalWrite(startLed, LOW);
-    digitalWrite(stopLed, HIGH);
-    
-  }
-  else if (rfButtonA == 1 && rfButtonB == 1) {
-    // Pause the rover.
-    stop_bool_msg.data = true;
-    rfStop.publish(&stop_bool_msg);  // true to rfStop
-    start_bool_msg.data = false;
-    rfStart.publish(&start_bool_msg);  // false to rfStart
-
-    digitalWrite(startLed, LOW);
-    digitalWrite(stopLed, HIGH);
-    
+  else {
+    handleStopRoutine();  // Pause the rover.
   }
   
 }
