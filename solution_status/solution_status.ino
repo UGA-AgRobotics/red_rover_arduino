@@ -64,8 +64,6 @@ ros::Publisher rfStart("/rf_start", &start_bool_msg);
 
 void setup() {
 
-  Serial.begin(9600);
-
   nh.initNode();
   nh.advertise(rfStop);  // publishes to /rf_stop topic
   nh.advertise(rfStart);  // publishes to /rf_start topic
@@ -137,12 +135,15 @@ void handleStopRoutine() {
 void checkForEmergencyStop() {
   
   int rfButtonA = digitalRead(A2);  // Reads RF signal for emergency stop
-  int rfButtonB = digitalRead(A0);  // Reads RF signal for starting back up
+  int rfButtonD = digitalRead(A1);  // D button on RF module
 
   if (rfButtonA >= 1) {
     handleStopRoutine();  // Pause the rover.
   }
-  else if (rfButtonB >= 1) {
+  else if (rfButtonA < 1 && rfButtonD < 1) {
+    return;  // do nothing
+  }
+  else if (rfButtonD >= 1) {
     handleStartRoutine();  // Start the rover.
   }
   else {
